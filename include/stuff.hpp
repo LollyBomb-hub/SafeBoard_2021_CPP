@@ -4,7 +4,12 @@
 
 
 #include <algorithm>
-#include <filesystem>
+#ifdef LINUX
+	#include <filesystem>
+#else
+	#include <__fs/filesystem>
+	namespace std::filesystem = std::__fs::filesystem
+#endif
 #include <iostream>
 #include <string>
 
