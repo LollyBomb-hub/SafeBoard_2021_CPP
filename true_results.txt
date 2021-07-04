@@ -1,0 +1,7 @@
+====== True result ======
+Processed files: 150
+JS detects: 29
+Unix detects: 26
+macOS detects: 35
+Errors: 0
+=========================

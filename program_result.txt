@@ -1,0 +1,8 @@
+====== Scan result ======
+Processed files: 150
+JS detects: 29
+Unix detects: 26
+macOS detects: 35
+Errors: 0
+Execution time: 00:00:00:49
+=========================

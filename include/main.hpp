@@ -5,7 +5,12 @@
 
 #include <cstdlib>
 #include <cstring>
-#include <filesystem>
+#ifdef LINUX
+	#include <filesystem>
+#else
+	#include <__fs::filesystem>
+	namespace std::filesystem = std::__fs::filesystem;
+#endif
 #include <fstream>
 #include <iostream>
 #include <string>
