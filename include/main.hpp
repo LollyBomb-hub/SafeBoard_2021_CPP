@@ -47,4 +47,7 @@ const char macOS_mark[] = {
 		};
 
 
+void process_folder(const char* folder_name);
+
+
 #endif

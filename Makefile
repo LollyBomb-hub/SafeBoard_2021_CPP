@@ -3,7 +3,7 @@ CXX := g++
 # Sources variable
 SOURCES := $(wildcard ./*.cpp)
 # Target variable
-TARGET := ./build/scan_util
+TARGET_FOLDER := ./build/
 TESTS_FOLDER := ./tests
 GENERATE_TESTS := ./generate_tests.py
 COUNT_OF_TESTS := 150
@@ -12,11 +12,16 @@ CFLAGS := -O3 -Wall -Wextra -Wpedantic -Werror -std=c++17
 
 
 linux_target:
-	$(CXX) $(CFLAGS) -DLINUX $(SOURCES) -o $(TARGET)
+	$(CXX) $(CFLAGS) -DLINUX $(SOURCES) -o $(TARGET_FOLDER)/scan_util
 
 
 macOS_target:
-	$(CXX) $(CFLAGS) $(SOURCES) -o $(TARGET)
+	$(CXX) $(CFLAGS) $(SOURCES) -o $(TARGET_FOLDER)/scan_util
+
+
+daemon_target:
+	$(CXX) $(CFLAGS) -DLINUX -DDAEMON $(SOURCES) -o $(TARGET_FOLDER)/scan_service
+	$(CXX) $(CFLAGS) -DLINUX ./utility/main.cpp -o $(TARGET_FOLDER)/scan_util
 
 
 tests: $(SOURCES)

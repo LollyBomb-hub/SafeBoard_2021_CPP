@@ -3,6 +3,30 @@
 #include "include/time.hpp"
 
 
+#ifdef DAEMON
+
+	#include <assert.h>
+	#include <signal.h>
+	#include <sys/wait.h>
+	#include <sys/resource.h>
+	#include <sys/stat.h>
+	#include <unistd.h>
+
+	void signal_handler(int signum)
+	{
+		if(signum == SIGUSR1)
+		{
+			int from_pid;
+			std::string folder = read_argument(from_pid);
+			process_folder(folder.c_str());
+			kill(from_pid, SIGUSR1);
+		}
+		return;
+	}
+
+#endif
+
+
 unsigned int errors			= 0;
 unsigned int totally_processed		= 0;
 unsigned int javascript_detects		= 0;
@@ -57,17 +81,12 @@ bool check_macos_file()
 }
 
 
-int main(int argc, char** argv)
+void process_folder(const char* folder_name)
 {
-	if(argc == 1 || argc > 2)
-	{
-		print_help();
-		return 0;
-	}
-	if(argument_exists((const char*)argv[1]))
+	if(argument_exists(folder_name))
 	{
 		start_time();
-		for(auto& directory_entry: std::filesystem::directory_iterator(argv[1]))
+		for(auto& directory_entry: std::filesystem::directory_iterator(folder_name))
 		{
 			if(std::filesystem::is_regular_file(directory_entry))
 			{
@@ -100,10 +119,54 @@ int main(int argc, char** argv)
 	}
 	else
 	{
-		std::cout << "Specified( " << argv[1] << " ) folder doesn\'t exist.\n";
-		std::cout << "Check arguments.\n";
+		#ifndef DAEMON
+			std::cout << "Specified( " << folder_name << " ) folder doesn\'t exist.\n";
+			std::cout << "Check arguments.\n";
+		#else
+			save_error(folder_name);
+		#endif
+		return;
+	}
+	#ifndef DAEMON
+		print_report();
+	#else
+		save_report();
+	#endif
+	clear_variables();
+	return;
+}
+
+#ifndef DAEMON
+int main(int argc, char** argv)
+{
+	if(argc == 1 || argc > 2)
+	{
+		print_help();
 		return 0;
 	}
-	print_report();
+	process_folder(argv[1]);
+#else
+int main(void)
+{
+	pid_t pid;
+	pid = fork();
+	if(pid < 0)
+		return -1;
+	if(pid != 0)
+	{
+		exit(0);
+	}
+	setsid();
+	umask(0);
+	chdir(getenv("HOME"));
+	write_pid((int)getpid());
+	struct rlimit flim;
+	getrlimit(RLIMIT_NOFILE, &flim);
+	for(unsigned int fd = 0; fd < flim.rlim_max; fd++)
+		close(fd);
+	(void)signal(SIGUSR1, signal_handler);
+	for(;;)
+		pause();
+#endif
 	return 0;
 }
